@@ -1,10 +1,12 @@
 from flask import request
 from flask_restx import Resource, marshal, fields
 from mongoengine import ValidationError
-from app_name.api.schemas.book import book_schema, book_schema_dump
+from app_name.api.schemas.book import book_schema, book_schema_dump, book_purchase_schema
 from app_name.models import BookAuthor, Book
 from app_name.api.restplus import api
 from app_name.api.middleware import token_required
+from app_name.producer import producer
+
 
 ns = api.namespace(
     'books', description='Operations related to books')
@@ -114,3 +116,22 @@ class BookItem(Resource):
             return {"message": "Unexpected error"}, 500
 
         return None, 204
+
+
+@ns.route('/purchase')
+class BookPurchase(Resource):
+
+    @classmethod
+    @ns.response(201, "Book purchase processing...", schema_response)
+    @ns.expect(book_purchase_schema, validate=True)
+    def post(cls):
+        """
+        Creates a new book.
+        """
+        data = request.json
+        producer.send(
+            topic="PURCHASE_BOOK", value=data)
+        result = {
+            "message": "Book purchase processing..."
+        }
+        return result, 201

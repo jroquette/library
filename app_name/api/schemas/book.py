@@ -20,3 +20,8 @@ book_schema = api.model('Book Schema', {
 book_schema_dump = api.clone('Book Schema Dump', book_schema, {
     "id": fields.String(description="Book id"),
 })
+
+book_purchase_schema = api.model('Book Purchase', {
+    "book_id": fields.String(required=True, description="Book id"),
+    "buyer_name": fields.String(description="Buyer's name"),
+})
